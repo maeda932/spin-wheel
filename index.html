@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spin the Wheel</title>
+
+  <!-- Brunson font -->
+  <style>
+    @font-face {
+      font-family: 'Brunson';
+      src: url('https://fonts.cdnfonts.com/s/98303/Brunson-Regular.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      font-family: 'Brunson', sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    #wheel {
+      margin: 30px auto;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 10px solid #333;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      background-color: #f39c12;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    #spinBtn, #resetBtn {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px 10px 0 10px;
+    }
+
+    #result {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 20px;
+      color: green;
+    }
+
+    table {
+      margin: 30px auto;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #555;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+
+    th {
+      background-color: #f39c12;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎉 Spin the Wheel 🎉</h1>
+  <div id="wheel"></div>
+  <button id="spinBtn">Spin Now</button>
+  <button id="resetBtn">Reset Spin</button>
+  <div id="result"></div>
+
+  <h2>🎁 Prize List</h2>
+  <table>
+    <tr><th>Prize</th></tr>
+    <tr><td>Free Game</td></tr>
+    <tr><td>₹50 Off</td></tr>
+    <tr><td>Mystery Game</td></tr>
+    <tr><td>Spin Again</td></tr>
+    <tr><td>No Prize</td></tr>
+    <tr><td>Game Upgrade</td></tr>
+  </table>
+
+  <script>
+    const prizes = ["Free Game", "₹50 Off", "Mystery Game", "Spin Again", "No Prize", "Game Upgrade"];
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const result = document.getElementById("result");
+
+    const segmentAngle = 360 / prizes.length;
+    prizes.forEach((text, i) => {
+      const seg = document.createElement("div");
+      seg.className = "segment";
+      seg.style.transform = `rotate(${i * segmentAngle}deg) skewY(-${90 - segmentAngle}deg)`;
+      seg.textContent = text;
+      wheel.appendChild(seg);
+    });
+
+    let hasSpun = localStorage.getItem("hasSpun") === "true";
+    if (hasSpun) {
+      spinBtn.disabled = true;
+      result.textContent = localStorage.getItem("spinResult") || "You already spun!";
+    }
+
+    spinBtn.onclick = function () {
+      if (hasSpun) return;
+
+      const randomIndex = Math.floor(Math.random() * prizes.length);
+      const selectedPrize = prizes[randomIndex];
+
+      const spinDegrees = 3600 + (360 - (randomIndex * segmentAngle + segmentAngle / 2));
+      wheel.style.transition = "transform 4s ease-out";
+      wheel.style.transform = `rotate(${spinDegrees}deg)`;
+
+      setTimeout(() => {
+        result.textContent = `🎁 You won: ${selectedPrize}!`;
+        if (selectedPrize === "Spin Again") {
+          localStorage.setItem("hasSpun", "false");
+          spinBtn.disabled = false;
+          alert("You get a free extra spin!");
+        } else {
+          localStorage.setItem("hasSpun", "true");
+          spinBtn.disabled = true;
+        }
+        localStorage.setItem("spinResult", result.textContent);
+      }, 4000);
+    };
+
+    resetBtn.onclick = function () {
+      const pin = prompt("Enter PIN to unlock spin:");
+      if (pin === "1947") {
+        localStorage.removeItem("hasSpun");
+        localStorage.removeItem("spinResult");
+        result.textContent = "";
+        spinBtn.disabled = false;
+        wheel.style.transform = "rotate(0deg)";
+        alert("Spin unlocked. You can now spin again!");
+      } else {
+        alert("Incorrect PIN. Access denied.");
+      }
+    };
+  </script>
+</body>
+</html>
